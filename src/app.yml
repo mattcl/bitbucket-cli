@@ -1,0 +1,82 @@
+name: bitbucket-cli
+version: 0.1.0
+author: Matt Chun-Lum
+about: |
+  Simple * Bitbuket pull request helpers.
+
+  *Nothing involving an atlassian api is ever simple
+
+global_settings:
+  - SubcommandRequiredElseHelp
+  - ColoredHelp
+
+args:
+  - debug:
+      help: Enable debugging
+      long: debug
+
+subcommands:
+  - setup:
+      about: Create a config file (this only needs to be done once, usually)
+
+  - groups:
+      about: List groups from config file
+
+  - pr:
+      about: Open a pull request
+      after_help: |
+        The following are some general usage examples
+            bb pr 'foo'
+            bb pr 'foo' -d 'my description'
+            bb pr 'foo' -D
+            bb pr 'foo' -g empty
+            bb pr 'foo' -g core_team -g ui_team -a bob -a nancy
+            bb pr 'foo' -r bob -r nancy
+            bb pr 'foo' -b other_branch
+            bb pr 'foo' --dry-run
+
+      args:
+        - title:
+            help: The title for the pull request
+            index: 1
+            required: true
+        - dry_run:
+            help: Show the API request but don't execute it
+            long: dry-run
+        - description:
+            help: The description (conflicts with -D)
+            short: d
+            long: description
+            takes_value: true
+            conflicts_with: long_description
+        - long_description:
+            help: Write description in $EDITOR (conflicts with -d)
+            short: D
+            long: long-description
+            conflicts_with: description
+        - branch:
+            help: The branch (defaults to branch set in the config file
+            short: b
+            long: branch
+            takes_value: true
+        - append:
+            help: Append this user to the list of reviewers (may be specified multiple times) (conflicts with -r)
+            short: a
+            long: append-reviewer
+            multiple: true
+            takes_value: true
+        - group:
+            help: 'The group of users (specified in config file) to add as reviewers (may be specified multiple times) (conflicts with -r) There is a special "empty" group'
+            short: g
+            long: group
+            multiple: true
+            takes_value: true
+        - reviewer:
+            help: A reviewer to add (may be specified multiple times) (conflicts with -a, -g)
+            short: r
+            long: reviewer
+            multiple: true
+            takes_value: true
+            conflicts_with:
+              - group
+              - append
