@@ -6,8 +6,10 @@ about: |
 
   *Nothing involving an atlassian api is ever simple
 
-global_settings:
+settings:
   - SubcommandRequiredElseHelp
+
+global_settings:
   - ColoredHelp
 
 args:

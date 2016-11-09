@@ -17,6 +17,7 @@ use std::path::Path;
 
 use eprompt::Prompt;
 
+mod config;
 mod error;
 mod git;
 
@@ -34,4 +35,19 @@ fn main() {
         .get_matches();
 
     let config_file = matches.value_of("config").unwrap();
+
+    match git::repo_dir() {
+        Ok(path) => println!("path: {}", path.to_str().unwrap_or("????")),
+        Err(why) => println!("error!: {}", why)
+    }
+
+    match git::repo_name() {
+        Ok(name) => println!("repo name: {}", name),
+        Err(why) => println!("error!: {}", why)
+    }
+
+    match git::current_branch() {
+        Ok(branch) => println!("branch: {}", branch),
+        Err(why) => println!("error!: {}", why)
+    }
 }

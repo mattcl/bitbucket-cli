@@ -20,5 +20,9 @@ error_chain! {
             description("repo is empty")
             display("repo is empty")
         }
+        InvalidReference {
+            description("git reference is invalid")
+            display("git reference is invalid")
+        }
     }
 }
