@@ -1,6 +1,9 @@
 #[macro_use]
 extern crate clap;
+#[macro_use]
+extern crate error_chain;
 extern crate eprompt;
+extern crate git2;
 extern crate hyper;
 extern crate prettytable;
 extern crate rpassword;
@@ -13,6 +16,9 @@ use std::env;
 use std::path::Path;
 
 use eprompt::Prompt;
+
+mod error;
+mod git;
 
 fn main() {
     let default_config_path = env::home_dir().unwrap().join(".bb.yml");
