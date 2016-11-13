@@ -17,9 +17,22 @@ use std::path::Path;
 
 use eprompt::Prompt;
 
+use client::Bitbucket;
+use config::Config;
+use error::UnwrapOrExit;
+
+mod client;
 mod config;
 mod error;
 mod git;
+mod pull_request;
+
+pub fn exit(message: &str) -> ! {
+    let err = clap::Error::with_description(message, clap::ErrorKind::InvalidValue);
+    err.exit();
+}
+
+fn pr(config: &Config, client: &Bitbucket, matches: &ArgMatches) {}
 
 fn main() {
     let default_config_path = env::home_dir().unwrap().join(".bb.yml");
@@ -35,19 +48,28 @@ fn main() {
         .get_matches();
 
     let config_file = matches.value_of("config").unwrap();
+    let config_path = Path::new(config_file);
+    let config = Config::from_file(&config_path).unwrap_or_exit("Invalid config file");
+    let client = client::Bitbucket::new("foo".to_string(), "bar".to_string())
+        .unwrap_or_exit("Could not create client");
+
+    match matches.subcommand_name() {
+        Some("pr") => pr(&config, &client, &matches),
+        _ => unreachable!(),
+    }
 
     match git::repo_dir() {
-        Ok(path) => println!("path: {}", path.to_str().unwrap_or("????")),
-        Err(why) => println!("error!: {}", why)
+        Ok(path) => println!("path: {}", path.to_str().unwrap_or_exit("????")),
+        Err(why) => println!("error!: {}", why),
     }
 
     match git::repo_name() {
         Ok(name) => println!("repo name: {}", name),
-        Err(why) => println!("error!: {}", why)
+        Err(why) => println!("error!: {}", why),
     }
 
     match git::current_branch() {
         Ok(branch) => println!("branch: {}", branch),
-        Err(why) => println!("error!: {}", why)
+        Err(why) => println!("error!: {}", why),
     }
 }
