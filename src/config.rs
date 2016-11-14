@@ -1,11 +1,11 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::fs::File;
 use std::path::Path;
 use std::io::Read;
 
-use yaml_rust::YamlLoader;
+use yaml_rust::{Yaml, YamlLoader};
 
-use error::{ErrorKind, Result};
+use error::{Error, ErrorKind, Result};
 
 #[derive(Debug)]
 pub struct Project {
@@ -20,9 +20,16 @@ pub struct Project {
 pub struct Config {
     pub server: String,
     pub auth: String,
-    pub browser_command: String,
     pub open_in_browser: bool,
+    pub browser_command: String,
     pub projects: HashMap<String, Project>,
+    pub groups: HashMap<String, HashSet<String>>,
+}
+
+fn unpack<F, T>(key: &str, f: F) -> Result<T>
+    where F: Fn() -> Option<T>
+{
+    f().ok_or::<Error>(ErrorKind::InvalidConfig(key.to_string()).into())
 }
 
 impl Config {
@@ -33,9 +40,35 @@ impl Config {
         let docs = YamlLoader::load_from_str(&content)?;
         let data = &docs[0];
 
-        let server = data["server"].as_str()
-            .ok_or(ErrorKind::InvalidConfig("server".to_string()).into())?;
-        Err(ErrorKind::InvalidConfig("derp".to_string()).into())
+        let server = unpack("server", || data["server"].as_str())?.to_string();
+        let auth = unpack("auth_token", || data["auth_token"].as_str())?.to_string();
+        let open_in_browser = unpack("open_in_browser", || data["open_in_browser"].as_bool())?;
+        let browser_command = unpack("browser_command", || data["browser_command"].as_str())?.to_string();
+        let groups_raw = unpack("reviewer_groups", || data["reviewer_groups"].as_hash())?;
+
+        let mut groups = HashMap::new();
+
+        for (key, value) in groups_raw {
+            let name = unpack("this should not be possible", || key.as_str())?.to_string();
+
+            let mut group = HashSet::new();
+
+            let users = unpack("", || value.as_vec())?;
+            for user in users {
+                let u = unpack("", || user.as_str())?.to_string();
+                group.insert(u);
+            }
+            groups.insert(name, group);
+        }
+
+        Ok(Config {
+            server: server,
+            auth: auth,
+            open_in_browser: open_in_browser,
+            browser_command: browser_command,
+            projects: HashMap::new(),
+            groups: groups,
+        })
     }
 }
 
