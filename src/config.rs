@@ -3,6 +3,7 @@ use std::fs::File;
 use std::path::Path;
 use std::io::Read;
 
+use tera::Tera;
 use yaml_rust::{Yaml, YamlLoader};
 
 use error::{Error, ErrorKind, Result};
@@ -14,6 +15,24 @@ pub struct Project {
     pub target_project: String,
     pub target_slug: String,
     pub target_branch: String,
+}
+
+impl Project {
+    pub fn from_data(data: &Yaml) -> Result<Project> {
+        let source_project = unpack("source_project", || data["source_project"].as_str())?.to_string();
+        let source_slug = unpack("source_slug", || data["source_slug"].as_str())?.to_string();
+        let target_project = unpack("target_project", || data["target_project"].as_str())?.to_string();
+        let target_slug = unpack("target_slug", || data["target_slug"].as_str())?.to_string();
+        let target_branch = unpack("target_branch", || data["target_branch"].as_str())?.to_string();
+
+        Ok(Project {
+            source_project: source_project,
+            source_slug: source_slug,
+            target_project: target_project,
+            target_slug: target_slug,
+            target_branch: target_branch,
+        })
+    }
 }
 
 #[derive(Debug)]
@@ -44,8 +63,19 @@ impl Config {
         let auth = unpack("auth_token", || data["auth_token"].as_str())?.to_string();
         let open_in_browser = unpack("open_in_browser", || data["open_in_browser"].as_bool())?;
         let browser_command = unpack("browser_command", || data["browser_command"].as_str())?.to_string();
-        let groups_raw = unpack("reviewer_groups", || data["reviewer_groups"].as_hash())?;
 
+        // Projects
+        let projects_raw = unpack("projects", || data["projects"].as_hash())?;
+        let mut projects = HashMap::new();
+
+        for (key, value) in projects_raw {
+            let name = unpack("this should not be possible", || key.as_str())?.to_string();
+            let project = Project::from_data(&value)?;
+            projects.insert(name, project);
+        }
+
+        // Groups
+        let groups_raw = unpack("reviewer_groups", || data["reviewer_groups"].as_hash())?;
         let mut groups = HashMap::new();
 
         for (key, value) in groups_raw {
@@ -66,9 +96,13 @@ impl Config {
             auth: auth,
             open_in_browser: open_in_browser,
             browser_command: browser_command,
-            projects: HashMap::new(),
+            projects: projects,
             groups: groups,
         })
+    }
+
+    pub fn save(&self) -> Result<()> {
+        let tera = Tera::new("templates/**/*");
     }
 }
 

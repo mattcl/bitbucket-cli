@@ -8,6 +8,7 @@ extern crate hyper;
 extern crate prettytable;
 extern crate rpassword;
 extern crate rustc_serialize;
+extern crate tera;
 extern crate url;
 extern crate yaml_rust;
 

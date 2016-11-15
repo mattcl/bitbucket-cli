@@ -69,10 +69,17 @@ impl<T> UnwrapOrExit<T> for Option<T> {
     }
 }
 
-impl<T, E> UnwrapOrExit<T> for result::Result<T, E> {
+impl<T> UnwrapOrExit<T> for Result<T> {
     fn unwrap_or_else<F>(self, f: F) -> T
         where F: FnOnce() -> T
     {
         self.unwrap_or_else(|_| f())
+    }
+
+    fn unwrap_or_exit(self, message: &str) -> T {
+        self.unwrap_or_else(|e| {
+            let err = clap::Error::with_description(&format!("{}: {}", message, e), clap::ErrorKind::InvalidValue);
+            err.exit()
+        })
     }
 }
