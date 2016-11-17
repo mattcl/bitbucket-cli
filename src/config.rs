@@ -1,9 +1,8 @@
 use std::collections::{HashMap, HashSet};
 use std::fs::File;
 use std::path::Path;
-use std::io::Read;
+use std::io::{Read, Write};
 
-use tera::Tera;
 use yaml_rust::{Yaml, YamlLoader};
 
 use error::{Error, ErrorKind, Result};
@@ -19,9 +18,11 @@ pub struct Project {
 
 impl Project {
     pub fn from_data(data: &Yaml) -> Result<Project> {
-        let source_project = unpack("source_project", || data["source_project"].as_str())?.to_string();
+        let source_project =
+            unpack("source_project", || data["source_project"].as_str())?.to_string();
         let source_slug = unpack("source_slug", || data["source_slug"].as_str())?.to_string();
-        let target_project = unpack("target_project", || data["target_project"].as_str())?.to_string();
+        let target_project =
+            unpack("target_project", || data["target_project"].as_str())?.to_string();
         let target_slug = unpack("target_slug", || data["target_slug"].as_str())?.to_string();
         let target_branch = unpack("target_branch", || data["target_branch"].as_str())?.to_string();
 
@@ -62,7 +63,8 @@ impl Config {
         let server = unpack("server", || data["server"].as_str())?.to_string();
         let auth = unpack("auth_token", || data["auth_token"].as_str())?.to_string();
         let open_in_browser = unpack("open_in_browser", || data["open_in_browser"].as_bool())?;
-        let browser_command = unpack("browser_command", || data["browser_command"].as_str())?.to_string();
+        let browser_command =
+            unpack("browser_command", || data["browser_command"].as_str())?.to_string();
 
         // Projects
         let projects_raw = unpack("projects", || data["projects"].as_hash())?;
@@ -77,6 +79,9 @@ impl Config {
         // Groups
         let groups_raw = unpack("reviewer_groups", || data["reviewer_groups"].as_hash())?;
         let mut groups = HashMap::new();
+
+        let empty_group: HashSet<String> = HashSet::new();
+        groups.insert("empty".to_string(), empty_group);
 
         for (key, value) in groups_raw {
             let name = unpack("this should not be possible", || key.as_str())?.to_string();
@@ -101,47 +106,79 @@ impl Config {
         })
     }
 
-    pub fn save(&self) -> Result<()> {
-        let tera = Tera::new("templates/**/*");
+    pub fn create_file(path: &Path,
+                       server: &str,
+                       auth: &str,
+                       project_name: &str,
+                       source_project: &str,
+                       source_slug: &str,
+                       target_project: &str,
+                       target_slug: &str,
+                       target_branch: &str)
+                       -> Result<()> {
+        let mut file = try!(File::create(&path));
+        let content = format!("# configuration for bitbucket-cli
+server: \"{server}\"
+auth_token: \"{auth}\"
+
+# default value for open in browser
+open_in_browser: false
+
+# This is executed as <browser_command> <pull request url>
+browser_command: \"google-chrome\"
+
+# You can specify a list of projects here. Projects are detected via the
+# basename of the git repo directory or via a .bitbucket-proj file at
+# <git repo basename>/.bitbucket-proj. The must contain one line: the project name
+projects:
+  # The project name should be the same name as the repo basename (directory).
+  # This enables the auto-detection. If you'd rather specify the project for
+  # a repo explicitly, create a .bitbucket-proj file containing the project
+  # name as specified below
+  {project_name}:
+    # The source project is the project KEY or a tilde-prefixed username for
+    # a personal project. This is the project the pull request will be made from.
+    source_project: {source_project}
+
+    # The source slug is the repository under the source project from which the
+    # pull request will be made.
+    source_slug: {source_slug}
+
+    # The target project is the project KEY to which the pull request will be made.
+    target_project: {target_project}
+
+    # The target slug is the repo within the target project to which the pull
+    # request will be made.
+    target_slug: {target_slug}
+
+    # The target branch is the branch to which the pull request will be made.
+    # This can be overwritten on the command line.
+    target_branch: {target_branch}
+
+# You can always specify reviewers via the command line, but these are here to
+# provide convenient sets of frequently-included reviewers. The names here are
+# the \"names\" for the desired set of stash users. You can get a (limit 1000)
+# list of users by running `stash users`
+reviewer_groups:
+  default:
+    - foo
+    - bar.baz
+
+#  core:
+#    - foo
+#    - herp
+#    - derp
+",
+                              server = server,
+                              auth = auth,
+                              project_name = project_name,
+                              source_project = source_project,
+                              source_slug = source_slug,
+                              target_project = target_project,
+                              target_slug = target_slug,
+                              target_branch = target_branch);
+
+        try!(file.write_all(content.as_bytes()));
+        Ok(())
     }
 }
-
-
-// fn create_config_file(path: &Path, config: &Config) -> Result<()> {
-//     let mut file = try!(File::create(&path));
-//     let content = format!("# configuration for oh-bother
-// config_version: 1
-// config:
-//   # connectivity settings
-//   jira: \"{jira}\"
-//   username: \"{username}\"
-//   auth: \"{auth}\"
-
-//   # controls whether or not manipulated issues are opened in the web browser
-//   open_in_browser: true
-//   browser_command: google-chrome
-
-//   # These projects are used to find issues for commands like 'list' and 'next'
-//   project_keys:
-//     - \"{project_key}\"
-
-//   # these users are users for whom a ticket is considered 'fair game' or 'unassigned'
-//   npc_users:
-//     - Unassigned
-//     - \"{npc}\"
-
-//   new_issue_defaults:
-//     project_key: \"{project_key}\"
-//     assignee: \"{npc}\"
-//     labels:
-//       - interrupt
-// ",
-//                           jira = jira,
-//                           username = username,
-//                           auth = auth,
-//                           npc = npc,
-//                           project_key = project_key);
-
-//     try!(file.write_all(content.as_bytes()));
-//     Ok(())
-// }

@@ -78,7 +78,8 @@ impl<T> UnwrapOrExit<T> for Result<T> {
 
     fn unwrap_or_exit(self, message: &str) -> T {
         self.unwrap_or_else(|e| {
-            let err = clap::Error::with_description(&format!("{}: {}", message, e), clap::ErrorKind::InvalidValue);
+            let err = clap::Error::with_description(&format!("{}: {}", message, e),
+                                                    clap::ErrorKind::InvalidValue);
             err.exit()
         })
     }
