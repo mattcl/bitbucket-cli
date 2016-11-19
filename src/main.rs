@@ -156,6 +156,8 @@ fn pr(config: &Config, client: &Bitbucket, matches: &ArgMatches) -> Result<()> {
         }
     }
 
+    println!("computed reviewers: {:?}", reviewers);
+
     pull_request.reviewers(reviewers.iter());
 
     let url = client.create_pull_request(&pull_request, dry, debug)?;

@@ -26,6 +26,10 @@ error_chain! {
     }
 
     errors {
+        DryRun {
+            description("dry run not a real error")
+            display("dry run not a real error")
+        }
         RepoEmpty {
             description("repo is empty")
             display("repo is empty")

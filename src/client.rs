@@ -38,6 +38,10 @@ impl Bitbucket {
             println!("{}", body);
         }
 
+        if dry {
+            return Err(ErrorKind::DryRun.into())
+        }
+
         let mut res =
             self.client.post(url).headers(self.headers.clone()).body(body.as_str()).send()?;
         let mut response_body = String::new();
