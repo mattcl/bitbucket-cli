@@ -1,4 +1,3 @@
-use std::result;
 use std::env;
 use std::io;
 use url;
@@ -39,13 +38,25 @@ error_chain! {
             description("git reference is invalid")
             display("git reference is invalid")
         }
-        RequestError(t: String) {
+        RequestError(response: String) {
             description("request error")
-            display("request error. response: {}", t)
+            display("request error. response: {}", response)
         }
         MissingSelfLink {
             description("response missing self link")
             display("response missing self link")
+        }
+        MissingSubcommand(command: String) {
+            description("missing subcommand")
+            display("missing subcommand: {}", command)
+        }
+        ProjectNotFound(project: String) {
+            description("project not found")
+            display("project not found: {}", project)
+        }
+        GroupNotFound(group: String) {
+            description("group not found")
+            display("group not found: {}", group)
         }
     }
 }

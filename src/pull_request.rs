@@ -1,6 +1,3 @@
-use std::collections::HashMap;
-use error::{ErrorKind, Result};
-
 #[derive(RustcEncodable)]
 pub struct Reference {
     id: String,
@@ -40,6 +37,7 @@ pub struct User {
     name: String,
 }
 
+#[allow(non_snake_case)]
 #[derive(RustcEncodable)]
 pub struct PullRequest {
     title: String,
@@ -50,9 +48,9 @@ pub struct PullRequest {
 }
 
 impl PullRequest {
-    pub fn new(title: String) -> PullRequest {
+    pub fn new(title: &str) -> PullRequest {
         PullRequest {
-            title: title,
+            title: title.to_string(),
             fromRef: None,
             toRef: None,
             reviewers: Vec::new(),
@@ -61,31 +59,37 @@ impl PullRequest {
     }
 
     pub fn from_ref<'a>(&'a mut self,
-                        branch: String,
-                        slug: String,
-                        project: String)
+                        branch: &str,
+                        slug: &str,
+                        project: &str)
                         -> &'a mut PullRequest {
-        self.fromRef = Some(Reference::new(branch, slug, project));
+        self.fromRef =
+            Some(Reference::new(branch.to_string(), slug.to_string(), project.to_string()));
         self
     }
 
     pub fn to_ref<'a>(&'a mut self,
-                      branch: String,
-                      slug: String,
-                      project: String)
+                      branch: &str,
+                      slug: &str,
+                      project: &str)
                       -> &'a mut PullRequest {
-        self.toRef = Some(Reference::new(branch, slug, project));
+        self.toRef =
+            Some(Reference::new(branch.to_string(), slug.to_string(), project.to_string()));
         self
     }
 
-    pub fn reviewer<'a>(&'a mut self, reviewer: String) -> &'a mut PullRequest {
-        let reviewer = Reviewer { user: User { name: reviewer } };
-        self.reviewers.push(reviewer);
+    pub fn reviewers<'a, I>(&'a mut self, reviewers: I) -> &'a mut PullRequest
+        where I: Iterator<Item = &'a String>
+    {
+        for reviewer in reviewers {
+            let reviewer = Reviewer { user: User { name: reviewer.to_string() } };
+            self.reviewers.push(reviewer);
+        }
         self
     }
 
-    pub fn description<'a>(&'a mut self, description: String) -> &'a mut PullRequest {
-        self.description = description;
+    pub fn description<'a>(&'a mut self, description: &str) -> &'a mut PullRequest {
+        self.description = description.to_string();
         self
     }
 }

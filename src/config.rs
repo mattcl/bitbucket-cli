@@ -181,4 +181,16 @@ reviewer_groups:
         try!(file.write_all(content.as_bytes()));
         Ok(())
     }
+
+    pub fn get_project(&self, project: &str) -> Result<&Project> {
+        self.projects
+            .get(project)
+            .ok_or::<Error>(ErrorKind::ProjectNotFound(project.to_string()).into())
+    }
+
+    pub fn get_group(&self, group: &str) -> Result<&HashSet<String>> {
+        self.groups
+            .get(group)
+            .ok_or::<Error>(ErrorKind::GroupNotFound(group.to_string()).into())
+    }
 }

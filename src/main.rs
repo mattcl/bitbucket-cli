@@ -1,3 +1,5 @@
+#![recursion_limit = "1024"]
+
 #[macro_use]
 extern crate clap;
 #[macro_use]
@@ -12,6 +14,7 @@ extern crate url;
 extern crate yaml_rust;
 
 use clap::{App, Arg, ArgMatches};
+use std::collections::HashSet;
 use std::env;
 use std::io;
 use std::io::Write;
@@ -22,13 +25,15 @@ use rustc_serialize::base64::{ToBase64, STANDARD};
 
 use client::Bitbucket;
 use config::Config;
-use error::{Result, UnwrapOrExit};
+use error::{Error, ErrorKind, Result, UnwrapOrExit};
+use pull_request::PullRequest;
 
 mod client;
 mod config;
 mod error;
 mod git;
 mod pull_request;
+mod util;
 
 pub fn exit(message: &str) -> ! {
     let err = clap::Error::with_description(message, clap::ErrorKind::InvalidValue);
@@ -101,12 +106,67 @@ Please edit {} to have your desired configuration (particularly user groups)",
 
 fn groups(config: &Config) -> Result<()> {
     for (name, group) in &config.groups {
-        println!("{}: []", name);
+        println!("{}: {:?}", name, group);
     }
     Ok(())
 }
 
 fn pr(config: &Config, client: &Bitbucket, matches: &ArgMatches) -> Result<()> {
+    let debug = matches.is_present("debug");
+
+    let subcmd = matches.subcommand_matches("pr")
+        .ok_or::<Error>(ErrorKind::MissingSubcommand("pr".to_string()).into())?;
+
+    let dry = subcmd.is_present("dry_run");
+
+    let project = config.get_project(&util::get_project_name()?)?;
+
+    let title = subcmd.value_of("title").unwrap(); // This is safe since it's required
+    let mut description = subcmd.value_of("description").unwrap_or("").to_string();
+    if subcmd.is_present("long_description") {
+        description = Prompt::new().execute()?.trim().to_string();
+    }
+
+    let branch = git::current_branch()?;
+    let target_branch = subcmd.value_of("branch").unwrap_or(&project.target_branch);
+    let mut pull_request = PullRequest::new(title);
+    pull_request.from_ref(&branch, &project.source_slug, &project.source_project);
+    pull_request.to_ref(target_branch, &project.target_slug, &project.target_project);
+    pull_request.description(&description);
+
+    let mut reviewers = HashSet::new();
+
+    if let Some(reviewer_list) = subcmd.values_of("reviewer") {
+        for reviewer in reviewer_list {
+            reviewers.insert(reviewer.to_string());
+        }
+    } else {
+        if let Some(groups) = subcmd.values_of("group") {
+            for group in groups {
+                reviewers = &reviewers | config.get_group(group)?;
+            }
+        } else {
+            reviewers = &reviewers | config.get_group("default")?;
+        }
+
+        if let Some(appended) = subcmd.values_of("append") {
+            for append in appended {
+                reviewers.insert(append.to_string());
+            }
+        }
+    }
+
+    pull_request.reviewers(reviewers.iter());
+
+    let url = client.create_pull_request(&pull_request, dry, debug)?;
+
+    println!("Created pull request: {}", url.as_str());
+
+    if subcmd.is_present("open") || config.open_in_browser {
+        println!("Opening in browser...");
+        util::open_in_browser(config, &url)?;
+    }
+
     Ok(())
 }
 
@@ -128,7 +188,7 @@ fn main() {
 
     if matches.is_present("setup") {
         match setup(&config_path) {
-            Err(why) => exit(&format!("error: {}", why)),
+            Err(why) => exit(&format!("{}", why)),
             Ok(_) => return,
         }
     }
@@ -144,21 +204,7 @@ fn main() {
     };
 
     match res {
-        Err(why) => exit(&format!("error: {}", why)),
+        Err(why) => exit(&format!("{}", why)),
         Ok(_) => {}
     }
-    // match git::repo_dir() {
-    //     Ok(path) => println!("path: {}", path.to_str().unwrap_or_exit("????")),
-    //     Err(why) => println!("error!: {}", why),
-    // }
-
-    // match git::repo_name() {
-    //     Ok(name) => println!("repo name: {}", name),
-    //     Err(why) => println!("error!: {}", why),
-    // }
-
-    // match git::current_branch() {
-    //     Ok(branch) => println!("branch: {}", branch),
-    //     Err(why) => println!("error!: {}", why),
-    // }
 }

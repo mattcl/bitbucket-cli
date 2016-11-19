@@ -57,7 +57,7 @@ subcommands:
             long: long-description
             conflicts_with: description
         - branch:
-            help: The branch (defaults to branch set in the config file
+            help: The target branch (defaults to branch set in the config file
             short: b
             long: branch
             takes_value: true
@@ -82,3 +82,7 @@ subcommands:
             conflicts_with:
               - group
               - append
+        - open:
+            help: Open in browser (can be specified in config file)
+            short: o
+            long: open

@@ -30,14 +30,23 @@ impl Bitbucket {
         })
     }
 
-    pub fn create_pull_request(&self, pull_request: &PullRequest) -> Result<Url> {
+    pub fn create_pull_request(&self, pull_request: &PullRequest, dry: bool, debug: bool) -> Result<Url> {
         let url = self.base_url.join("")?;
         let body = json::encode(pull_request)?;
-        let mut res = self.client.post(url).body(body.as_str()).send()?;
+
+        if debug {
+            println!("{}", body);
+        }
+
+        let mut res =
+            self.client.post(url).headers(self.headers.clone()).body(body.as_str()).send()?;
         let mut response_body = String::new();
         res.read_to_string(&mut response_body)?;
 
         if res.status.is_success() {
+            if debug {
+                println!("{}", response_body);
+            }
             let data = json::Json::from_str(response_body.as_str())?;
             get_self_url(&data)
         } else {
