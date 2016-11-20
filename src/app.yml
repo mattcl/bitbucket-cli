@@ -2,7 +2,7 @@ name: bitbucket-cli
 version: 0.1.0
 author: Matt Chun-Lum
 about: |
-  Simple * Bitbucket pull request helpers.
+  Simple * helper for creating bitbucket server pull requests
 
   *Nothing involving an atlassian api is ever simple
 
