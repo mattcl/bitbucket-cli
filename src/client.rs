@@ -30,7 +30,11 @@ impl Bitbucket {
         })
     }
 
-    pub fn create_pull_request(&self, pull_request: &PullRequest, dry: bool, debug: bool) -> Result<Url> {
+    pub fn create_pull_request(&self,
+                               pull_request: &PullRequest,
+                               dry: bool,
+                               debug: bool)
+                               -> Result<Url> {
         let url = self.base_url.join("")?;
         let body = json::encode(pull_request)?;
 
@@ -39,7 +43,7 @@ impl Bitbucket {
         }
 
         if dry {
-            return Err(ErrorKind::DryRun.into())
+            return Err(ErrorKind::DryRun.into());
         }
 
         let mut res =

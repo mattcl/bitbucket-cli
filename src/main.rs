@@ -129,11 +129,6 @@ fn pr(config: &Config, client: &Bitbucket, matches: &ArgMatches) -> Result<()> {
 
     let branch = git::current_branch()?;
     let target_branch = subcmd.value_of("branch").unwrap_or(&project.target_branch);
-    let mut pull_request = PullRequest::new(title);
-    pull_request.from_ref(&branch, &project.source_slug, &project.source_project);
-    pull_request.to_ref(target_branch, &project.target_slug, &project.target_project);
-    pull_request.description(&description);
-
     let mut reviewers = HashSet::new();
 
     if let Some(reviewer_list) = subcmd.values_of("reviewer") {
@@ -158,9 +153,15 @@ fn pr(config: &Config, client: &Bitbucket, matches: &ArgMatches) -> Result<()> {
 
     println!("computed reviewers: {:?}", reviewers);
 
-    pull_request.reviewers(reviewers.iter());
-
-    let url = client.create_pull_request(&pull_request, dry, debug)?;
+    let url = client.create_pull_request(&PullRequest::new(title)
+                                 .from_ref(&branch, &project.source_slug, &project.source_project)
+                                 .to_ref(target_branch,
+                                         &project.target_slug,
+                                         &project.target_project)
+                                 .description(&description)
+                                 .reviewers(reviewers.iter()),
+                             dry,
+                             debug)?;
 
     println!("Created pull request: {}", url.as_str());
 

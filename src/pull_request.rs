@@ -1,4 +1,4 @@
-#[derive(RustcEncodable)]
+#[derive(Debug, Eq, PartialEq, RustcEncodable)]
 pub struct Reference {
     id: String,
     repository: Repository,
@@ -16,29 +16,29 @@ impl Reference {
     }
 }
 
-#[derive(RustcEncodable)]
+#[derive(Debug, Eq, PartialEq, RustcEncodable)]
 pub struct Repository {
     slug: String,
     project: Project,
 }
 
-#[derive(RustcEncodable)]
+#[derive(Debug, Eq, PartialEq, RustcEncodable)]
 pub struct Project {
     key: String,
 }
 
-#[derive(RustcEncodable)]
+#[derive(Debug, Eq, PartialEq, RustcEncodable)]
 pub struct Reviewer {
     user: User,
 }
 
-#[derive(RustcEncodable)]
+#[derive(Debug, Eq, PartialEq, RustcEncodable)]
 pub struct User {
     name: String,
 }
 
 #[allow(non_snake_case)]
-#[derive(RustcEncodable)]
+#[derive(Debug, Eq, PartialEq, RustcEncodable)]
 pub struct PullRequest {
     title: String,
     fromRef: Option<Reference>,
@@ -91,5 +91,66 @@ impl PullRequest {
     pub fn description<'a>(&'a mut self, description: &str) -> &'a mut PullRequest {
         self.description = description.to_string();
         self
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn pull_request_construction() {
+        let pull_request = PullRequest::new("derp");
+        assert_eq!("derp", pull_request.title);
+
+        let reviewers: Vec<Reviewer> = Vec::new();
+        assert_eq!(reviewers, pull_request.reviewers);
+
+        assert_eq!(String::new(), pull_request.description);
+        assert!(pull_request.fromRef.is_none());
+        assert!(pull_request.toRef.is_none());
+    }
+
+    #[test]
+    fn setting_from_ref() {
+        let mut pull_request = PullRequest::new("derp");
+        let reference = Reference::new("branch".to_string(),
+                                       "slug".to_string(),
+                                       "project".to_string());
+
+        pull_request.from_ref("branch", "slug", "project");
+
+        assert_eq!(reference, pull_request.fromRef.unwrap());
+    }
+
+    #[test]
+    fn setting_to_ref() {
+        let mut pull_request = PullRequest::new("derp");
+        let reference = Reference::new("branch".to_string(),
+                                       "slug".to_string(),
+                                       "project".to_string());
+
+        pull_request.to_ref("branch", "slug", "project");
+
+        assert_eq!(reference, pull_request.toRef.unwrap());
+    }
+
+    #[test]
+    fn setting_reviewrs() {
+        let mut pull_request = PullRequest::new("derp");
+        let names = vec!["foo".to_string(), "bar".to_string(), "baz".to_string()];
+        let mut reviewers = Vec::new();
+        for name in &names {
+            let reviewer = Reviewer { user: User { name: name.to_string() } };
+            reviewers.push(reviewer);
+        }
+        pull_request.reviewers(names.iter());
+    }
+
+    #[test]
+    fn setting_description() {
+        let mut pull_request = PullRequest::new("derp");
+        pull_request.description("my description");
+        assert_eq!("my description".to_string(), pull_request.description);
     }
 }
