@@ -62,7 +62,7 @@ impl Config {
 
         let server = unpack("server", || data["server"].as_str())?.to_string();
         let auth = unpack("auth_token", || data["auth_token"].as_str())?.to_string();
-        let open_in_browser = unpack("open_in_browser", || data["open_in_browser"].as_bool())?;
+        let open_in_browser = unpack("open_in_browser", || data["open_in_browser"].as_bool()).unwrap_or(false);
         let browser_command =
             unpack("browser_command", || data["browser_command"].as_str())?.to_string();
 

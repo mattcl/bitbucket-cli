@@ -25,7 +25,7 @@ subcommands:
       about: List groups from config file
 
   - user:
-      about: Find a specific user or users
+      about: "Find a specific user or users given a filter. This is useful for determining user slugs for use in your config file and/or direct arguments to the 'pr' subcommand."
       args:
         - filter:
             help: The username, email, or slug must contain this filter
@@ -35,14 +35,15 @@ subcommands:
   - pr:
       about: Open a pull request
       after_help: |
-        The following are some general usage examples
+        The following are some general usage examples (not all combinations of arguments shown)
             bb pr 'foo'
             bb pr 'foo' -d 'my description'
             bb pr 'foo' -D
             bb pr 'foo' -g empty
             bb pr 'foo' -g core_team -g ui_team -a bob -a nancy
             bb pr 'foo' -r bob -r nancy
-            bb pr 'foo' -b other_branch
+            bb pr 'foo' -b feature_branch
+            bb pr 'foo' --open
             bb pr 'foo' --dry-run
 
       args:
