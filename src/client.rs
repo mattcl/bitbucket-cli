@@ -37,6 +37,10 @@ impl UserSearchResult {
 
         table.print_tty(force_colorize);
     }
+
+    pub fn is_empty(&self) -> bool {
+        self.users.is_empty()
+    }
 }
 
 pub struct Bitbucket {

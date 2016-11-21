@@ -177,7 +177,12 @@ fn user(client: &Bitbucket, matches: &ArgMatches, debug: bool) -> Result<()> {
     let filter = subcmd.value_of("filter").unwrap(); // This is safe since it's required
 
     let result = client.user(filter, debug)?;
-    result.print_tty(true);
+
+    if result.is_empty() {
+        println!("No users found matching the filter: {}", filter);
+    } else {
+        result.print_tty(true);
+    }
 
     Ok(())
 }
