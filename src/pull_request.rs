@@ -1,7 +1,7 @@
 #[derive(Debug, Eq, PartialEq, RustcEncodable)]
 pub struct Reference {
     id: String,
-    repository: Repository,
+    pub repository: Repository,
 }
 
 impl Reference {
@@ -18,13 +18,13 @@ impl Reference {
 
 #[derive(Debug, Eq, PartialEq, RustcEncodable)]
 pub struct Repository {
-    slug: String,
-    project: Project,
+    pub slug: String,
+    pub project: Project,
 }
 
 #[derive(Debug, Eq, PartialEq, RustcEncodable)]
 pub struct Project {
-    key: String,
+    pub key: String,
 }
 
 #[derive(Debug, Eq, PartialEq, RustcEncodable)]
@@ -91,6 +91,20 @@ impl PullRequest {
     pub fn description<'a>(&'a mut self, description: &str) -> &'a mut PullRequest {
         self.description = description.to_string();
         self
+    }
+
+    pub fn project(&self) -> Option<String> {
+        if let Some(ref r) = self.toRef {
+            return Some(r.repository.project.key.clone());
+        }
+        None
+    }
+
+    pub fn slug(&self) -> Option<String> {
+        if let Some(ref r) = self.toRef {
+            return Some(r.repository.slug.clone());
+        }
+        None
     }
 }
 

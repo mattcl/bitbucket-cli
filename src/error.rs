@@ -62,6 +62,10 @@ error_chain! {
             description("group not found")
             display("group not found: {}", group)
         }
+        InvalidPullRequest(reason: String) {
+            description("invalid pull request")
+            display("invalid pull request: {}", reason)
+        }
     }
 }
 

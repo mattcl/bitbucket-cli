@@ -5,7 +5,7 @@ use hyper::header::{Headers, Authorization, ContentType};
 use hyper::mime::{Mime, TopLevel, SubLevel, Attr, Value};
 use rustc_serialize::json;
 
-use error::{ErrorKind, Result};
+use error::{Error, ErrorKind, Result};
 use pull_request::PullRequest;
 
 
@@ -35,7 +35,17 @@ impl Bitbucket {
                                dry: bool,
                                debug: bool)
                                -> Result<Url> {
-        let url = self.base_url.join("")?;
+
+        let component = format!("rest/api/1.0/projects/{}/repos/{}/pull-requests",
+                                pull_request.project()
+                                    .ok_or::<Error>(ErrorKind::InvalidPullRequest("Missing toRef"
+                                            .to_string())
+                                        .into())?,
+                                pull_request.slug()
+                                    .ok_or::<Error>(ErrorKind::InvalidPullRequest("Missing toRef"
+                                            .to_string())
+                                        .into())?);
+        let url = self.base_url.join(&component)?;
         let body = json::encode(pull_request)?;
 
         if debug {
@@ -66,6 +76,8 @@ impl Bitbucket {
 
 fn get_self_url(data: &json::Json) -> Result<Url> {
     let link = data.find_path(&["links", "self"])
+        .and_then(|obj| obj.as_array())
+        .and_then(|obj| obj.iter().next())
         .and_then(|obj| obj.find("href"))
         .and_then(|obj| obj.as_string());
 
