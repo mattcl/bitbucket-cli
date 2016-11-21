@@ -24,6 +24,14 @@ subcommands:
   - groups:
       about: List groups from config file
 
+  - user:
+      about: Find a specific user or users
+      args:
+        - filter:
+            help: The username, email, or slug must contain this filter
+            index: 1
+            required: true
+
   - pr:
       about: Open a pull request
       after_help: |

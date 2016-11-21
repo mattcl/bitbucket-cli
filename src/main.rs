@@ -111,9 +111,7 @@ fn groups(config: &Config) -> Result<()> {
     Ok(())
 }
 
-fn pr(config: &Config, client: &Bitbucket, matches: &ArgMatches) -> Result<()> {
-    let debug = matches.is_present("debug");
-
+fn pr(config: &Config, client: &Bitbucket, matches: &ArgMatches, debug: bool) -> Result<()> {
     let subcmd = matches.subcommand_matches("pr")
         .ok_or::<Error>(ErrorKind::MissingSubcommand("pr".to_string()).into())?;
 
@@ -173,6 +171,17 @@ fn pr(config: &Config, client: &Bitbucket, matches: &ArgMatches) -> Result<()> {
     Ok(())
 }
 
+fn user(client: &Bitbucket, matches: &ArgMatches, debug: bool) -> Result<()> {
+    let subcmd = matches.subcommand_matches("user")
+        .ok_or::<Error>(ErrorKind::MissingSubcommand("user".to_string()).into())?;
+    let filter = subcmd.value_of("filter").unwrap(); // This is safe since it's required
+
+    let result = client.user(filter, debug)?;
+    result.print_tty(true);
+
+    Ok(())
+}
+
 fn main() {
     let default_config_path = env::home_dir().unwrap().join(".bb.yml");
     let yml = load_yaml!("app.yml");
@@ -200,9 +209,12 @@ fn main() {
     let client = client::Bitbucket::new(config.auth.clone(), config.server.clone())
         .unwrap_or_exit("Could not create client");
 
+    let debug = matches.is_present("debug");
+
     let res = match matches.subcommand_name() {
         Some("groups") => groups(&config),
-        Some("pr") => pr(&config, &client, &matches),
+        Some("pr") => pr(&config, &client, &matches, debug),
+        Some("user") => user(&client, &matches, debug),
         _ => unreachable!(),
     };
 

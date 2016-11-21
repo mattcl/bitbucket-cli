@@ -66,6 +66,10 @@ error_chain! {
             description("invalid pull request")
             display("invalid pull request: {}", reason)
         }
+        InvalidResponse {
+            description("invalid response")
+            display("invalid response")
+        }
     }
 }
 
