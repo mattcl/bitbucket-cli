@@ -1,8 +1,12 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::{BTreeMap, HashMap, HashSet};
 use std::fs::File;
 use std::path::Path;
 use std::io::{Read, Write};
 
+use prettytable::Table;
+use prettytable::row::Row;
+use prettytable::cell::Cell;
+use prettytable::format;
 use yaml_rust::{Yaml, YamlLoader};
 
 use error::{Error, ErrorKind, Result};
@@ -43,7 +47,7 @@ pub struct Config {
     pub open_in_browser: bool,
     pub browser_command: String,
     pub projects: HashMap<String, Project>,
-    pub groups: HashMap<String, HashSet<String>>,
+    pub groups: BTreeMap<String, HashSet<String>>,
 }
 
 fn unpack<F, T>(key: &str, f: F) -> Result<T>
@@ -62,7 +66,8 @@ impl Config {
 
         let server = unpack("server", || data["server"].as_str())?.to_string();
         let auth = unpack("auth_token", || data["auth_token"].as_str())?.to_string();
-        let open_in_browser = unpack("open_in_browser", || data["open_in_browser"].as_bool()).unwrap_or(false);
+        let open_in_browser = unpack("open_in_browser", || data["open_in_browser"].as_bool())
+            .unwrap_or(false);
         let browser_command =
             unpack("browser_command", || data["browser_command"].as_str())?.to_string();
 
@@ -78,7 +83,7 @@ impl Config {
 
         // Groups
         let groups_raw = unpack("reviewer_groups", || data["reviewer_groups"].as_hash())?;
-        let mut groups = HashMap::new();
+        let mut groups = BTreeMap::new();
 
         let empty_group: HashSet<String> = HashSet::new();
         groups.insert("empty".to_string(), empty_group);
@@ -192,5 +197,21 @@ reviewer_groups:
         self.groups
             .get(group)
             .ok_or::<Error>(ErrorKind::GroupNotFound(group.to_string()).into())
+    }
+
+    pub fn print_groups(&self, force_colorize: bool) {
+        let mut table = Table::new();
+
+        let format = format::FormatBuilder::new()
+            .padding(1, 1)
+            .build();
+
+        table.set_format(format);
+
+        for (name, group) in &self.groups {
+            table.add_row(Row::new(vec![Cell::new(name), Cell::new(&format!("{:?}", group))]));
+        }
+
+        table.print_tty(force_colorize);
     }
 }

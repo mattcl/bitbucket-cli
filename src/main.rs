@@ -105,9 +105,7 @@ Please edit {} to have your desired configuration (particularly user groups)",
 }
 
 fn groups(config: &Config) -> Result<()> {
-    for (name, group) in &config.groups {
-        println!("{}: {:?}", name, group);
-    }
+    config.print_groups(true);
     Ok(())
 }
 
