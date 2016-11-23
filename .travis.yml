@@ -23,9 +23,9 @@ matrix:
       rust: stable
       env: TARGET=i686-unknown-linux-gnu
       addons:
-        sources: &xi686_unknown_linux_gnu_sources
-          - kalakris-cmake
         apt:
+          sources: &xi686_unknown_linux_gnu_sources
+            - kalakris-cmake
           packages: &i686_unknown_linux_gnu
             # Cross compiler and cross compiled C libraries
             - gcc-multilib
@@ -38,9 +38,9 @@ matrix:
       rust: stable
       env: TARGET=x86_64-unknown-linux-gnu
       addons:
-        sources: &x86_unknown_linux_gnu_sources
-          - kalakris-cmake
         apt:
+          sources: &x86_unknown_linux_gnu_sources
+            - kalakris-cmake
           packages: &x86_unknown_linux_gnu
             # Cross compiler and cross compiled C libraries
             - gcc-multilib
@@ -54,30 +54,30 @@ matrix:
       rust: beta
       env: TARGET=i686-unknown-linux-gnu
       addons:
-        sources: *xi686_unknown_linux_gnu_sources
         apt:
+          sources: *xi686_unknown_linux_gnu_sources
           packages: *i686_unknown_linux_gnu
     - os: linux
       rust: beta
       env: TARGET=x86_64-unknown-linux-gnu
       addons:
-        sources: *x86_unknown_linux_gnu_sources
         apt:
+          sources: *x86_unknown_linux_gnu_sources
           packages: *x86_unknown_linux_gnu
     # Nightly channel
     - os: linux
       rust: nightly
       env: TARGET=i686-unknown-linux-gnu
       addons:
-        sources: *i686_unknown_linux_gnu_sources
         apt:
+          sources: *i686_unknown_linux_gnu_sources
           packages: *i686_unknown_linux_gnu
     - os: linux
       rust: nightly
       env: TARGET=x86_64-unknown-linux-gnu
       addons:
-        sources: *x86_unknown_linux_gnu_sources
         apt:
+          sources: *x86_unknown_linux_gnu_sources
           packages: *x86_unknown_linux_gnu
   allow_failures:
     # TODO You might need to allow failures for some target on some channel for some reason. Below
