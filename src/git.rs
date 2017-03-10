@@ -1,6 +1,6 @@
 use std::env;
 use std::path::PathBuf;
-use git2::{Commit, Repository};
+use git2::Repository;
 use error::{ErrorKind, Result};
 
 fn repository() -> Result<Repository> {
