@@ -1,5 +1,5 @@
 name: bitbucket-cli
-version: 0.1.0
+version: 0.1.2
 author: Matt Chun-Lum
 about: |
   Simple * helper for creating bitbucket server pull requests
@@ -36,6 +36,7 @@ subcommands:
       about: Open a pull request
       after_help: |
         The following are some general usage examples (not all combinations of arguments shown)
+            bb pr -d 'my description (title will be commit message)'
             bb pr 'foo'
             bb pr 'foo' -d 'my description'
             bb pr 'foo' -D
@@ -48,14 +49,14 @@ subcommands:
 
       args:
         - title:
-            help: The title for the pull request
+            help: The title for the pull request. Will default to commit summary
             index: 1
-            required: true
+            required: false
         - dry_run:
             help: Show the API request but don't execute it
             long: dry-run
         - description:
-            help: The description (conflicts with -D)
+            help: The description (conflicts with -D). Will default to commit message
             short: d
             long: description
             takes_value: true

@@ -117,10 +117,19 @@ fn pr(config: &Config, client: &Bitbucket, matches: &ArgMatches, debug: bool) ->
 
     let project = config.get_project(&util::get_project_name()?)?;
 
-    let title = subcmd.value_of("title").unwrap(); // This is safe since it's required
-    let mut description = subcmd.value_of("description").unwrap_or("").to_string();
+    let commit_summary = git::commit_summary()?;
+    let title = match subcmd.value_of("title") {
+        Some(title) => title,
+        None => {
+            println!("No title specified, using commit summary: \"{}\"", commit_summary);
+            &commit_summary
+        }
+    };
+
+    let commit_message = git::commit_message()?;
+    let mut description = subcmd.value_of("description").unwrap_or(&commit_message).to_string();
     if subcmd.is_present("long_description") {
-        description = Prompt::new().execute()?.trim().to_string();
+        description = Prompt::new().initial_content(&commit_message).execute()?.trim().to_string();
     }
 
     let branch = git::current_branch()?;

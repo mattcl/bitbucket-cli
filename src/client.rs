@@ -87,6 +87,7 @@ impl Bitbucket {
         }
 
         if dry {
+            println!("Dry run: \"{}\"", body);
             return Err(ErrorKind::DryRun.into());
         }
 

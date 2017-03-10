@@ -1,6 +1,6 @@
 use std::env;
 use std::path::PathBuf;
-use git2::Repository;
+use git2::{Commit, Repository};
 use error::{ErrorKind, Result};
 
 fn repository() -> Result<Repository> {
@@ -33,4 +33,30 @@ pub fn repo_name() -> Result<String> {
         }
     }
     Err(ErrorKind::RepoEmpty.into())
+}
+
+pub fn commit_summary() -> Result<String> {
+    let repo = repository()?;
+    let head = repo.head()?;
+    let mut commit = match head.target() {
+        Some(oid) => repo.find_commit(oid)?,
+        None => return Err(ErrorKind::InvalidReference.into())
+    };
+    match commit.summary() {
+        Some(msg) => Ok(msg.to_string()),
+        None => Err(ErrorKind::InvalidReference.into())
+    }
+}
+
+pub fn commit_message() -> Result<String> {
+    let repo = repository()?;
+    let head = repo.head()?;
+    let mut commit = match head.target() {
+        Some(oid) => repo.find_commit(oid)?,
+        None => return Err(ErrorKind::InvalidReference.into())
+    };
+    match commit.summary() {
+        Some(msg) => Ok(msg.to_string()),
+        None => Err(ErrorKind::InvalidReference.into())
+    }
 }
