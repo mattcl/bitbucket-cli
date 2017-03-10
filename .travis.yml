@@ -29,7 +29,7 @@ matrix:
           packages: &x86_unknown_linux_gnu
             # Cross compiler and cross compiled C libraries
             - gcc-multilib
-            - libcurl14-openssl-dev
+            - libcurl4-openssl-dev
             - libelf-dev
             - libdw-dev
             - cmake
