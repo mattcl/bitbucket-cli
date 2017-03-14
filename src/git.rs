@@ -55,7 +55,7 @@ pub fn commit_message() -> Result<String> {
         Some(oid) => repo.find_commit(oid)?,
         None => return Err(ErrorKind::InvalidReference.into())
     };
-    match commit.summary() {
+    match commit.message_raw() {
         Some(msg) => Ok(msg.to_string()),
         None => Err(ErrorKind::InvalidReference.into())
     }
