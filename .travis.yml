@@ -51,6 +51,17 @@ matrix:
           sources: *x86_unknown_linux_gnu_sources
           packages: *x86_unknown_linux_gnu
 
+    - os: osx
+      rust: stable
+      before_install:
+        - export OPENSSL_INCLUDE_DIR=`brew --prefix openssl`/include
+        - export OPENSSL_LIB_DIR=`brew --prefix openssl`/lib
+      addons:
+        apt:
+          sources: *x86_unknown_linux_gnu_sources
+          packages: *x86_unknown_linux_gnu
+
+
   allow_failures:
     # TODO You might need to allow failures for some target on some channel for some reason. Below
     # there's one (commented out) example of how to do that. Just change the OS, channel and TARGET
