@@ -11,18 +11,18 @@ use yaml_rust::ScanError;
 
 error_chain! {
     links {
-        eprompt::Error, eprompt::ErrorKind, EPrompt;
+        EPrompt(eprompt::Error, eprompt::ErrorKind);
     }
 
     foreign_links {
-        env::VarError, VarError;
-        io::Error, IoError;
-        git2::Error, GitError;
-        url::ParseError, UrlParseError;
-        EncoderError, EncoderError;
-        ParserError, ParserError;
-        hyper::Error, HyperError;
-        ScanError, YamlScanError;
+        VarError(env::VarError);
+        IoError(io::Error);
+        GitError(git2::Error);
+        UrlParseError(url::ParseError);
+        EncoderError(EncoderError);
+        ParseError(ParserError);
+        HyperError(hyper::Error);
+        YamlScanError(ScanError);
     }
 
     errors {

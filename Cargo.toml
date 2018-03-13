@@ -14,7 +14,7 @@ lto = true
 [dependencies]
 clap = { version = "2.18.0", features = ["yaml"] }
 eprompt = { git = "https://github.com/mattcl/eprompt.git" }
-error-chain = "0.4"
+error-chain = "0.7.2"
 git2 = "0.5"
 hyper = "^0.9"
 prettytable-rs = "^0.6"

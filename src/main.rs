@@ -1,4 +1,4 @@
-#![recursion_limit = "1024"]
+#![recursion_limit = "1024"] // error chain recursion can be deep
 
 #[macro_use]
 extern crate clap;

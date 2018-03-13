@@ -51,7 +51,7 @@ pub fn commit_summary() -> Result<String> {
 pub fn commit_message() -> Result<String> {
     let repo = repository()?;
     let head = repo.head()?;
-    let mut commit = match head.target() {
+    let commit = match head.target() {
         Some(oid) => repo.find_commit(oid)?,
         None => return Err(ErrorKind::InvalidReference.into())
     };
