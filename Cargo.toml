@@ -1,6 +1,6 @@
 [package]
 name = "bitbucket-cli"
-version = "0.1.4"
+version = "0.2.0"
 authors = ["Matt Chun-Lum <mchunlum@gmail.com>"]
 
 [[bin]]

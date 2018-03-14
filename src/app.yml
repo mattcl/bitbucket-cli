@@ -1,5 +1,5 @@
 name: bitbucket-cli
-version: 0.1.4
+version: 0.2.0
 author: Matt Chun-Lum
 about: |
   Simple * helper for creating bitbucket server pull requests
@@ -31,6 +31,15 @@ subcommands:
             help: The username, email, or slug must contain this filter
             index: 1
             required: true
+
+  - list:
+      about: List pull requests you are participating in
+
+  - open:
+      about: List pull requests you currently have open
+
+  - reviewing:
+      about: List pull requests you currently are reviewing
 
   - pr:
       about: Open a pull request

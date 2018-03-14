@@ -34,17 +34,22 @@ pub struct Project {
     pub key: String,
 }
 
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
-pub struct Reviewer {
-    user: User,
-}
-
 #[allow(non_snake_case)]
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub struct User {
     name: String,
     #[serde(skip_serializing)] displayName: Option<String>,
     #[serde(skip_serializing)] slug: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
+pub struct Reviewer {
+    user: User,
+}
+
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
+pub struct Author {
+    user: User,
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
@@ -98,6 +103,7 @@ pub struct PullRequest {
     reviewers: Vec<Reviewer>,
     description: String,
     #[serde(skip_serializing)] links: HashMap<String, Vec<Link>>,
+    #[serde(skip_serializing)] author: Option<Author>,
 }
 
 impl PullRequest {
@@ -109,6 +115,7 @@ impl PullRequest {
             reviewers: Vec::new(),
             description: String::new(),
             links: HashMap::new(),
+            author: None,
         }
     }
 
@@ -183,6 +190,58 @@ impl PullRequest {
             }
         }
         None
+    }
+
+    pub fn author_name(&self) -> Option<String> {
+        if let Some(ref author) = self.author {
+            if let Some(ref display_name) = author.user.displayName {
+                return Some(display_name.clone());
+            }
+        }
+        None
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
+pub struct PullRequestList {
+    values: Vec<PullRequest>,
+}
+
+impl PullRequestList {
+    pub fn print_tty(&self, force_colorize: bool) {
+        let mut table = Table::new();
+
+        let format = format::FormatBuilder::new()
+            .padding(1, 1)
+            .separator(
+                format::LinePosition::Title,
+                format::LineSeparator::new('-', '-', '-', '-'),
+            )
+            .build();
+
+        table.set_format(format);
+        table.set_titles(Row::new(vec![Cell::new("title"), Cell::new("author"), Cell::new("link")]));
+
+        for pr in &self.values {
+            let mut display_name = pr.title.clone();
+            display_name.truncate(50);
+            let author = pr.author_name().unwrap_or("missing author".to_string());
+            let link = match pr.self_link() {
+                Some(l) => l.clone(),
+                None => "missing link".to_string(),
+            };
+            table.add_row(Row::new(vec![
+                Cell::new(&display_name),
+                Cell::new(&author),
+                Cell::new(&link),
+            ]));
+        }
+
+        table.print_tty(force_colorize);
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.values.is_empty()
     }
 }
 

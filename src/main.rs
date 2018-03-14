@@ -225,6 +225,16 @@ fn user(client: &Bitbucket, matches: &ArgMatches, debug: bool) -> Result<()> {
     Ok(())
 }
 
+fn list(client: &Bitbucket, debug: bool, role: &str) -> Result<()> {
+    let result = client.list_pull_requests(debug, role)?;
+    if result.is_empty() {
+        println!("No open pull requests where your role is {}", role);
+    } else {
+        result.print_tty(true);
+    }
+    Ok(())
+}
+
 fn main() {
     let default_config_path = env::home_dir().unwrap().join(".bb.yml");
     let yml = load_yaml!("app.yml");
@@ -260,6 +270,9 @@ fn main() {
         Some("groups") => groups(&config),
         Some("pr") => pr(&config, &client, &matches, debug),
         Some("user") => user(&client, &matches, debug),
+        Some("list") => list(&client, debug, "ALL"),
+        Some("open") => list(&client, debug, "AUTHOR"),
+        Some("reviewing") => list(&client, debug, "REVIEWER"),
         _ => unreachable!(),
     };
 

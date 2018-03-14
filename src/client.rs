@@ -7,7 +7,7 @@ use hyper::mime::{Attr, Mime, SubLevel, TopLevel, Value};
 use serde_json;
 
 use error::{Error, ErrorKind, Result};
-use bitbucket_data::{PullRequest, UserSearchResult};
+use bitbucket_data::{PullRequest, PullRequestList, UserSearchResult};
 
 pub struct Bitbucket {
     client: Client,
@@ -76,6 +76,36 @@ impl Bitbucket {
         } else {
             Err(ErrorKind::RequestError(response_body).into())
         }
+    }
+
+    pub fn list_pull_requests(&self, debug: bool, role: &str) -> Result<PullRequestList> {
+        let mut url = self.base_url.join("rest/api/1.0/dashboard/pull-requests")?;
+        url.query_pairs_mut().append_pair("state", "OPEN");
+
+        // annoyingly, the only way to specify this behavior is to not include
+        // the parameter at all
+        if role != "ALL" {
+            url.query_pairs_mut().append_pair("role", role);
+        }
+
+        if debug {
+            println!("{}", url);
+        }
+
+        let mut res = self.client.get(url).headers(self.headers.clone()).send()?;
+
+        let mut response_body = String::new();
+        res.read_to_string(&mut response_body)?;
+        if res.status.is_success() {
+            if debug {
+                println!("{}", response_body);
+            }
+            let res = serde_json::from_str(response_body.as_str())?;
+            Ok(res)
+        } else {
+            Err(ErrorKind::RequestError(response_body).into())
+        }
+
     }
 
     pub fn user(&self, filter: &str, debug: bool) -> Result<UserSearchResult> {
