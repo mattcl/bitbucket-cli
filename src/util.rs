@@ -14,7 +14,6 @@ pub fn get_project_name() -> Result<String> {
     let mut project_file = git::repo_dir()?;
     project_file.push(".bitbucket-proj");
 
-
     match File::open(project_file) {
         Ok(mut file) => {
             let mut content = String::new();
@@ -26,7 +25,10 @@ pub fn get_project_name() -> Result<String> {
 }
 
 pub fn open_in_browser(config: &Config, url: &Url) -> Result<()> {
-    match Command::new(config.browser_command.as_str()).arg(url.as_str()).output() {
+    match Command::new(config.browser_command.as_str())
+        .arg(url.as_str())
+        .output()
+    {
         Err(why) => Err(why.into()),
         Ok(_) => Ok(()),
     }

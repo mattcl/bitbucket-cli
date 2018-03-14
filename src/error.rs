@@ -6,7 +6,7 @@ use clap;
 use eprompt;
 use git2;
 use hyper;
-use rustc_serialize::json::{EncoderError, ParserError};
+use serde_json;
 use yaml_rust::ScanError;
 
 error_chain! {
@@ -19,10 +19,9 @@ error_chain! {
         IoError(io::Error);
         GitError(git2::Error);
         UrlParseError(url::ParseError);
-        EncoderError(EncoderError);
-        ParseError(ParserError);
         HyperError(hyper::Error);
         YamlScanError(ScanError);
+        SerdeJsonError(serde_json::Error);
     }
 
     errors {
@@ -66,17 +65,16 @@ error_chain! {
             description("invalid pull request")
             display("invalid pull request: {}", reason)
         }
-        InvalidResponse {
-            description("invalid response")
-            display("invalid response")
-        }
     }
 }
 
 pub trait UnwrapOrExit<T>
-    where Self: Sized
+where
+    Self: Sized,
 {
-    fn unwrap_or_else<F>(self, f: F) -> T where F: FnOnce() -> T;
+    fn unwrap_or_else<F>(self, f: F) -> T
+    where
+        F: FnOnce() -> T;
 
     fn unwrap_or_exit(self, message: &str) -> T {
         let err = clap::Error::with_description(message, clap::ErrorKind::InvalidValue);
@@ -86,7 +84,8 @@ pub trait UnwrapOrExit<T>
 
 impl<T> UnwrapOrExit<T> for Option<T> {
     fn unwrap_or_else<F>(self, f: F) -> T
-        where F: FnOnce() -> T
+    where
+        F: FnOnce() -> T,
     {
         self.unwrap_or_else(f)
     }
@@ -94,15 +93,18 @@ impl<T> UnwrapOrExit<T> for Option<T> {
 
 impl<T> UnwrapOrExit<T> for Result<T> {
     fn unwrap_or_else<F>(self, f: F) -> T
-        where F: FnOnce() -> T
+    where
+        F: FnOnce() -> T,
     {
         self.unwrap_or_else(|_| f())
     }
 
     fn unwrap_or_exit(self, message: &str) -> T {
         self.unwrap_or_else(|e| {
-            let err = clap::Error::with_description(&format!("{}: {}", message, e),
-                                                    clap::ErrorKind::InvalidValue);
+            let err = clap::Error::with_description(
+                &format!("{}: {}", message, e),
+                clap::ErrorKind::InvalidValue,
+            );
             err.exit()
         })
     }
