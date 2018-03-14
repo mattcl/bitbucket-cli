@@ -40,11 +40,11 @@ pub fn commit_summary() -> Result<String> {
     let head = repo.head()?;
     let mut commit = match head.target() {
         Some(oid) => repo.find_commit(oid)?,
-        None => return Err(ErrorKind::InvalidReference.into())
+        None => return Err(ErrorKind::InvalidReference.into()),
     };
     match commit.summary() {
         Some(msg) => Ok(msg.to_string()),
-        None => Err(ErrorKind::InvalidReference.into())
+        None => Err(ErrorKind::InvalidReference.into()),
     }
 }
 
@@ -53,10 +53,10 @@ pub fn commit_message() -> Result<String> {
     let head = repo.head()?;
     let commit = match head.target() {
         Some(oid) => repo.find_commit(oid)?,
-        None => return Err(ErrorKind::InvalidReference.into())
+        None => return Err(ErrorKind::InvalidReference.into()),
     };
     match commit.message_raw() {
         Some(msg) => Ok(msg.to_string()),
-        None => Err(ErrorKind::InvalidReference.into())
+        None => Err(ErrorKind::InvalidReference.into()),
     }
 }

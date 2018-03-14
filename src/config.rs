@@ -51,7 +51,8 @@ pub struct Config {
 }
 
 fn unpack<F, T>(key: &str, f: F) -> Result<T>
-    where F: Fn() -> Option<T>
+where
+    F: Fn() -> Option<T>,
 {
     f().ok_or::<Error>(ErrorKind::InvalidConfig(key.to_string()).into())
 }
@@ -66,8 +67,8 @@ impl Config {
 
         let server = unpack("server", || data["server"].as_str())?.to_string();
         let auth = unpack("auth_token", || data["auth_token"].as_str())?.to_string();
-        let open_in_browser = unpack("open_in_browser", || data["open_in_browser"].as_bool())
-            .unwrap_or(false);
+        let open_in_browser =
+            unpack("open_in_browser", || data["open_in_browser"].as_bool()).unwrap_or(false);
         let browser_command =
             unpack("browser_command", || data["browser_command"].as_str())?.to_string();
 
@@ -111,18 +112,20 @@ impl Config {
         })
     }
 
-    pub fn create_file(path: &Path,
-                       server: &str,
-                       auth: &str,
-                       project_name: &str,
-                       source_project: &str,
-                       source_slug: &str,
-                       target_project: &str,
-                       target_slug: &str,
-                       target_branch: &str)
-                       -> Result<()> {
+    pub fn create_file(
+        path: &Path,
+        server: &str,
+        auth: &str,
+        project_name: &str,
+        source_project: &str,
+        source_slug: &str,
+        target_project: &str,
+        target_slug: &str,
+        target_branch: &str,
+    ) -> Result<()> {
         let mut file = try!(File::create(&path));
-        let content = format!("# configuration for bitbucket-cli
+        let content = format!(
+            "# configuration for bitbucket-cli
 server: \"{server}\"
 auth_token: \"{auth}\"
 
@@ -174,14 +177,15 @@ reviewer_groups:
 #    - herp
 #    - derp
 ",
-                              server = server,
-                              auth = auth,
-                              project_name = project_name,
-                              source_project = source_project,
-                              source_slug = source_slug,
-                              target_project = target_project,
-                              target_slug = target_slug,
-                              target_branch = target_branch);
+            server = server,
+            auth = auth,
+            project_name = project_name,
+            source_project = source_project,
+            source_slug = source_slug,
+            target_project = target_project,
+            target_slug = target_slug,
+            target_branch = target_branch
+        );
 
         try!(file.write_all(content.as_bytes()));
         Ok(())
@@ -202,14 +206,15 @@ reviewer_groups:
     pub fn print_groups(&self, force_colorize: bool) {
         let mut table = Table::new();
 
-        let format = format::FormatBuilder::new()
-            .padding(1, 1)
-            .build();
+        let format = format::FormatBuilder::new().padding(1, 1).build();
 
         table.set_format(format);
 
         for (name, group) in &self.groups {
-            table.add_row(Row::new(vec![Cell::new(name), Cell::new(&format!("{:?}", group))]));
+            table.add_row(Row::new(vec![
+                Cell::new(name),
+                Cell::new(&format!("{:?}", group)),
+            ]));
         }
 
         table.print_tty(force_colorize);
