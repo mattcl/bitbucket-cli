@@ -299,6 +299,8 @@ mod tests {
             let reviewer = Reviewer {
                 user: User {
                     name: name.to_string(),
+                    displayName: None,
+                    slug: None,
                 },
             };
             reviewers.push(reviewer);
