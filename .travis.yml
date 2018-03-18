@@ -15,30 +15,11 @@ matrix:
     # Linux
     - env: TARGET=x86_64-unknown-linux-gnu
 
-    # OSX
-    - env: TARGET=x86_64-apple-darwin
-      os: osx
-
     # Testing other channels
     - env: TARGET=x86_64-unknown-linux-gnu
       rust: nightly
-    - env: TARGET=x86_64-apple-darwin
-      os: osx
-      rust: nightly
 
 addons:
-  apt:
-    sources:
-      - kalakris-cmake
-    packages:
-      # Cross compiler and cross compiled C libraries
-      - gcc-multilib
-      - libcurl4-openssl-dev
-      - libelf-dev
-      - libdw-dev
-      - cmake
-      - binutils-dev
-
 before_install:
   - set -e
   - rustup self update
