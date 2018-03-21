@@ -101,9 +101,14 @@ pub struct PullRequest {
     fromRef: Option<Reference>,
     toRef: Option<Reference>,
     reviewers: Vec<Reviewer>,
+    #[serde(default = "missing_description")]
     description: String,
     #[serde(skip_serializing)] links: HashMap<String, Vec<Link>>,
     #[serde(skip_serializing)] author: Option<Author>,
+}
+
+fn missing_description() -> String {
+    "missing description".to_string()
 }
 
 impl PullRequest {
