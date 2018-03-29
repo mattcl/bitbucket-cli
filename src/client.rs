@@ -32,6 +32,10 @@ impl Bitbucket {
         })
     }
 
+    pub fn branch_exists(&self, branch: &str) -> Result<bool> {
+        false
+    }
+
     pub fn create_pull_request(
         &self,
         pull_request: &PullRequest,
