@@ -6,8 +6,9 @@ use hyper::header::{Authorization, ContentType, Headers};
 use hyper::mime::{Attr, Mime, SubLevel, TopLevel, Value};
 use serde_json;
 
-use error::{Error, ErrorKind, Result};
 use bitbucket_data::{PullRequest, PullRequestList, UserSearchResult};
+use config::Project;
+use error::{Error, ErrorKind, Result};
 
 pub struct Bitbucket {
     client: Client,
@@ -32,8 +33,30 @@ impl Bitbucket {
         })
     }
 
-    pub fn branch_exists(&self, branch: &str) -> Result<bool> {
-        false
+    pub fn branch_exists(&self, project: &Project, branch: &str, debug: bool) -> Result<bool> {
+        /*
+         * So bitbucket server is really annoying in that they don't let you
+         * search for full ref names. Searching for a commit with the ref ends
+         * up being a lot more reliable (and faster) than filtering the list
+         * of branches from the branch api endpoint.
+         */
+        let component = format!(
+            "rest/api/1.0/projects/{}/repos/{}/commits",
+            project.target_project, project.target_slug
+        );
+        let mut url = self.base_url.join(&component)?;
+        url.query_pairs_mut().append_pair("until", branch);
+        url.query_pairs_mut().append_pair("limit", "1");
+
+        let mut res = self.client.get(url).headers(self.headers.clone()).send()?;
+        let mut response_body = String::new();
+        res.read_to_string(&mut response_body)?;
+
+        if debug {
+            println!("{}", response_body);
+        }
+
+        Ok(res.status.is_success())
     }
 
     pub fn create_pull_request(
@@ -109,7 +132,6 @@ impl Bitbucket {
         } else {
             Err(ErrorKind::RequestError(response_body).into())
         }
-
     }
 
     pub fn user(&self, filter: &str, debug: bool) -> Result<UserSearchResult> {

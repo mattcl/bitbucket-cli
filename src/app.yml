@@ -1,5 +1,5 @@
 name: bitbucket-cli
-version: 0.2.1
+version: 0.2.2
 author: Matt Chun-Lum
 about: |
   Simple * helper for creating bitbucket server pull requests
@@ -24,13 +24,8 @@ subcommands:
   - groups:
       about: List groups from config file
 
-  - branch:
-      about: checks if the specified branch exists
-      args:
-        - name:
-            help: The branch name
-            index: 1
-            required: true
+  - branch-exists:
+      about: checks if the current branch exists on target
 
   - user:
       about: "Find a specific user or users given a filter. This is useful for determining user slugs for use in your config file and/or direct arguments to the 'pr' subcommand."
