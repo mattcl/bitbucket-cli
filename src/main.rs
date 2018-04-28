@@ -123,6 +123,17 @@ Please edit {} to have your desired configuration (particularly user groups)",
     Ok(())
 }
 
+fn branch_exists_on_target(config: &Config, client: &Bitbucket, debug: bool) -> Result<()> {
+    let project = config.get_project(&util::get_project_name()?)?;
+    let branch = git::current_full_branch()?;
+    if client.branch_exists(project, &branch, debug)? {
+        println!("branch {} exists on target", branch);
+    } else {
+        println!("branch {} does not exist on target", branch);
+    }
+    Ok(())
+}
+
 fn groups(config: &Config) -> Result<()> {
     config.print_groups(true);
     Ok(())
@@ -267,6 +278,7 @@ fn main() {
     let debug = matches.is_present("debug");
 
     let res = match matches.subcommand_name() {
+        Some("branch-exists") => branch_exists_on_target(&config, &client, debug),
         Some("groups") => groups(&config),
         Some("pr") => pr(&config, &client, &matches, debug),
         Some("user") => user(&client, &matches, debug),

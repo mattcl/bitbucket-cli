@@ -26,6 +26,15 @@ pub fn current_branch() -> Result<String> {
     }
 }
 
+pub fn current_full_branch() -> Result<String> {
+    let repo = repository()?;
+    let head = repo.head()?;
+    match head.name() {
+        Some(name) => Ok(name.to_string()),
+        None => Err(ErrorKind::InvalidReference.into()),
+    }
+}
+
 pub fn repo_name() -> Result<String> {
     if let Some(name) = repo_dir()?.file_name() {
         if let Some(name_str) = name.to_str() {

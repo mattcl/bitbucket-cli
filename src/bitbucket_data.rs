@@ -38,8 +38,10 @@ pub struct Project {
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub struct User {
     name: String,
-    #[serde(skip_serializing)] displayName: Option<String>,
-    #[serde(skip_serializing)] slug: Option<String>,
+    #[serde(skip_serializing)]
+    displayName: Option<String>,
+    #[serde(skip_serializing)]
+    slug: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
@@ -73,12 +75,11 @@ impl UserSearchResult {
         table.set_titles(Row::new(vec![Cell::new("name"), Cell::new("slug")]));
 
         for user in &self.values {
-            let display_name = user.displayName.clone().unwrap_or("missing display name".to_string());
+            let display_name = user.displayName
+                .clone()
+                .unwrap_or("missing display name".to_string());
             let slug = user.slug.clone().unwrap_or("missing slug".to_string());
-            table.add_row(Row::new(vec![
-                Cell::new(&display_name),
-                Cell::new(&slug),
-            ]));
+            table.add_row(Row::new(vec![Cell::new(&display_name), Cell::new(&slug)]));
         }
 
         table.print_tty(force_colorize);
@@ -103,8 +104,10 @@ pub struct PullRequest {
     reviewers: Vec<Reviewer>,
     #[serde(default = "missing_description")]
     description: String,
-    #[serde(skip_serializing)] links: HashMap<String, Vec<Link>>,
-    #[serde(skip_serializing)] author: Option<Author>,
+    #[serde(skip_serializing)]
+    links: HashMap<String, Vec<Link>>,
+    #[serde(skip_serializing)]
+    author: Option<Author>,
 }
 
 fn missing_description() -> String {
@@ -225,7 +228,11 @@ impl PullRequestList {
             .build();
 
         table.set_format(format);
-        table.set_titles(Row::new(vec![Cell::new("title"), Cell::new("author"), Cell::new("link")]));
+        table.set_titles(Row::new(vec![
+            Cell::new("title"),
+            Cell::new("author"),
+            Cell::new("link"),
+        ]));
 
         for pr in &self.values {
             let mut display_name = pr.title.clone();
