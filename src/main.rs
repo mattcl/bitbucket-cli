@@ -174,6 +174,14 @@ fn pr(config: &Config, client: &Bitbucket, matches: &ArgMatches, debug: bool) ->
     }
 
     let branch = git::current_branch()?;
+
+    if config.target_branch_checking {
+        let full_branch = git::current_full_branch()?;
+        if client.branch_exists(project, &full_branch, debug)? {
+            return Err(ErrorKind::TargetBranchExists(full_branch).into());
+        }
+    }
+
     let target_branch = subcmd.value_of("branch").unwrap_or(&project.target_branch);
     let mut reviewers = HashSet::new();
 

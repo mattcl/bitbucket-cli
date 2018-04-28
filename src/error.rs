@@ -65,6 +65,10 @@ error_chain! {
             description("invalid pull request")
             display("invalid pull request: {}", reason)
         }
+        TargetBranchExists(branch: String) {
+            description("The current branch already exists on the target")
+            display("The current branch '{}' already exists on the target", branch)
+        }
     }
 }
 

@@ -44,6 +44,7 @@ impl Project {
 pub struct Config {
     pub server: String,
     pub auth: String,
+    pub target_branch_checking: bool,
     pub open_in_browser: bool,
     pub browser_command: String,
     pub projects: HashMap<String, Project>,
@@ -67,6 +68,8 @@ impl Config {
 
         let server = unpack("server", || data["server"].as_str())?.to_string();
         let auth = unpack("auth_token", || data["auth_token"].as_str())?.to_string();
+        let target_branch_checking =
+            unpack("target_branch_checking", || data["target_branch_checking"].as_bool()).unwrap_or(false);
         let open_in_browser =
             unpack("open_in_browser", || data["open_in_browser"].as_bool()).unwrap_or(false);
         let browser_command =
@@ -105,6 +108,7 @@ impl Config {
         Ok(Config {
             server: server,
             auth: auth,
+            target_branch_checking: target_branch_checking,
             open_in_browser: open_in_browser,
             browser_command: browser_command,
             projects: projects,
@@ -128,6 +132,12 @@ impl Config {
             "# configuration for bitbucket-cli
 server: \"{server}\"
 auth_token: \"{auth}\"
+
+# Default value for whether or not we should ensure the branch we are currently
+# opening a pull request from does not exist on the target (which may break fork
+# syncing). Setting this to true will reject opening a pr if the branch we are
+# creating the pull request from already exists on the target.
+target_branch_checking: false
 
 # default value for open in browser
 open_in_browser: false
